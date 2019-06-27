@@ -26,4 +26,4 @@ subprocess.call(["R", "--no-save", "-f", os.path.join(config["path"], "temp-plot
 
 # subprocess.call(["scp", "/home/pi/temps/temp.txt", "web:/var/www/robbarry.org/html/repo/_site/"])
 subprocess.call(["scp", os.path.join(config["path"], config["tempsimg"]), "web:/var/www/robbarry.org/html/repo/_site/"])
-
+subprocess.call(["scp", os.path.join(config["path"], config["tempssummary"]), "web:/var/www/robbarry.org/html/repo/_site/"])

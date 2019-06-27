@@ -1,3 +1,4 @@
+library("dplyr")
 library("config")
 
 config <- config::get(file = "/home/pi/temps-config.yml")
@@ -9,9 +10,28 @@ data$stamp <- as.POSIXct(data$stamp, tz = "BST")
 m <- mean(data$temp)
 s <- sd(data$temp) 
 
+data$rounded <-
+  as.POSIXct(
+      floor(as.numeric(data$stamp) / 3600) * 3600,
+      tz = "EST",
+      origin = "1970-01-01"
+    )
+
+png(paste0(config$path, "/", config$tempssummary), width=1000, height=400)
+
+sumdata <-
+  data %>%
+    filter(as.numeric(Sys.time()) - as.numeric(rounded) < (7 * 24 * 60 * 60)) %>%
+    group_by(rounded) %>%
+    summarize(test = mean(temp))
+
+plot(sumdata, type = "h", frame = F, lwd = 5, lend = 1)
+
+dev.off()
+
 data <- subset(
   data,
-  as.numeric(Sys.time()) - as.numeric(data$stamp) < (24 * 60 * 60)
+  as.numeric(Sys.time()) - as.numeric(data$stamp) < (25 * 60 * 60)
 )
 
 png(paste0(config$path, "/", config$tempsimg), width=1000, height=700)
@@ -41,6 +61,8 @@ lines(ls$x,
 current <- data[nrow(data), "temp"]
 abline(h = current, col = "darkgreen", lty = 1, lwd = 1)
 p <- 1
+print(current)
+print(m)
 if (current > m) p <- 3
 text(data[1, "stamp"], current, round(current, 1), pos = p, col = "darkgreen")
 
