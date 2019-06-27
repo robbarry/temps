@@ -25,7 +25,10 @@ sumdata <-
     group_by(rounded) %>%
     summarize(test = mean(temp))
 
-plot(sumdata, type = "h", frame = F, lwd = 5, lend = 1)
+plot(sumdata, type = "h", frame = F, lwd = 5, lend = 1,
+    xlab = "Hour",
+    ylab = "Temp",
+    main = config$tempstitle)
 
 dev.off()
 
