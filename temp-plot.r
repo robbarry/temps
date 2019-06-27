@@ -17,7 +17,7 @@ data$rounded <-
       origin = "1970-01-01"
     )
 
-png(paste0(config$path, "/", config$tempssummary), width=1000, height=400)
+png(paste0(config$path, "/", config$tempssummary), width=1000, height=700)
 
 sumdata <-
   data %>%
