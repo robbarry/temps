@@ -1,5 +1,6 @@
 library("dplyr")
 library("config")
+library("suncalc")
 
 config <- config::get(file = "/home/pi/temps-config.yml")
 
@@ -32,9 +33,14 @@ plot(sumdata, type = "h", frame = F, lwd = 5, lend = 1,
     main = paste0(config$tempstitle, " [hourly]"))
 
 days <- as.POSIXct(paste0(unique(as.Date(sumdata$rounded)), " 00:00:00"), tz = "EST", origin = "1970-01-01")
-for(i in 1:length(days)) {
-  start <- days[i] - 4 * 60 * 60
-  end <- days[i] + 7 * 60 * 60 
+
+sundays <- as.Date(days)
+sundays <- c(min(sundays) - 1, sundays, max(sundays) + 1)
+sun <- getSunlightTimes(sundays, lat = config$lat, lon = config$lon, keep = c("sunrise", "sunset"))
+
+for(i in 1:(NROW(sun) - 1)) {
+  start <- as.POSIXct(sun[i, "sunset"], tz = "BST", origin = "1970-01-01")
+  end <- as.POSIXct(sun[i + 1, "sunrise"], tz = "BST", origin = "1970-01-01")
   rect(start, -10, end, 150, col = rgb(0, 0, 0, .15), border = NA)
 }
 
