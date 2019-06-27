@@ -28,7 +28,15 @@ sumdata <-
 plot(sumdata, type = "h", frame = F, lwd = 5, lend = 1,
     xlab = "Hour",
     ylab = "Temp",
-    main = config$tempstitle)
+    col = rgb(.75, 0, 0, 1),
+    main = paste0(config$tempstitle, " [hourly]"))
+
+days <- as.POSIXct(paste0(unique(as.Date(sumdata$rounded)), " 00:00:00"), tz = "EST", origin = "1970-01-01")
+for(i in 1:length(days)) {
+  start <- days[i] - 4 * 60 * 60
+  end <- days[i] + 7 * 60 * 60 
+  rect(start, -10, end, 150, col = rgb(0, 0, 0, .15), border = NA)
+}
 
 dev.off()
 
@@ -49,7 +57,7 @@ plot(data$stamp,
         col = "blue",
         xlab = "Time",
         ylab = "Temp",
-        main = config$tempstitle)
+        main = paste0(config$tempstitle, " [by minute]"))
 
 abline(h = m, col = "red", lty = 2, lwd = 2)
 abline(h = m - s, col = "black", lty = 2)
