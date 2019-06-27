@@ -36,11 +36,11 @@ days <- as.POSIXct(paste0(unique(as.Date(sumdata$rounded)), " 00:00:00"), tz = "
 
 sundays <- as.Date(days)
 sundays <- c(min(sundays) - 1, sundays, max(sundays) + 1)
-sun <- getSunlightTimes(sundays, lat = config$lat, lon = config$lon, keep = c("sunrise", "sunset"))
+sun <- getSunlightTimes(sundays, lat = config$lat, lon = config$lon, keep = c("sunrise", "sunset"), tz = "America/New_York")
 
 for(i in 1:(NROW(sun) - 1)) {
-  start <- as.POSIXct(sun[i, "sunset"], tz = "BST", origin = "1970-01-01")
-  end <- as.POSIXct(sun[i + 1, "sunrise"], tz = "BST", origin = "1970-01-01")
+  start <- sun[i, "sunset"]
+  end <- sun[i + 1, "sunrise"]
   rect(start, -10, end, 150, col = rgb(0, 0, 0, .15), border = NA)
 }
 
