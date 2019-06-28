@@ -14,6 +14,12 @@ data$day <- floor_date(data$tzstamp, unit = "day")
 m <- mean(data$temp)
 s <- sd(data$temp) 
 
+data$hour <- hour(data$tzstamp)
+hourly <-
+  data %>%
+    group_by(hour) %>%
+    summarize(avg = mean(temp), sd = sd(temp))
+
 sumdata <-
   data %>%
     filter(today() - rounded < (7 * 24 * 60)) %>%
@@ -34,6 +40,14 @@ sundays <- c(min(sundays) - 1, sundays, max(sundays) + 1)
 sun <- getSunlightTimes(sundays, lat = config$lat, lon = config$lon, keep = c("sunrise", "sunset"), tz = "America/New_York")
 
 for(i in 1:(NROW(sun) - 1)) {
+  for(j in 1:NROW(hourly)) {
+    rect(
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) - 1/2), config$timezone), hourly[j, "avg"] + hourly[j, "sd"],
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) + 1/2), config$timezone), hourly[j, "avg"] - hourly[j, "sd"],
+      border = NA,
+      col = rgb(0, 1, 0, .15)
+    )
+  }
   start <- sun[i, "sunset"]
   end <- sun[i + 1, "sunrise"]
   rect(start, -10, end, 150, col = rgb(0, 0, 0, .15), border = NA)
@@ -74,17 +88,11 @@ p <- 1
 if (current > m) p <- 3
 text(m_data[1, "tzstamp"], current, round(current, 1), pos = p, col = "darkgreen")
 
-data$hour <- hour(data$tzstamp)
-hourly <-
-  data %>%
-    group_by(hour) %>%
-    summarize(avg = mean(temp), sd = sd(temp))
-
 for(i in 1:(NROW(sun) - 1)) {
   for(j in 1:NROW(hourly)) {
     rect(
-      with_tz(ymd_h(paste0(sun[i, "date"], " ", hourly[j, "hour"])) - .5 * 60 * 60, config$timezone), hourly[j, "avg"] + hourly[j, "sd"],
-      with_tz(ymd_h(paste0(sun[i, "date"], " ", hourly[j, "hour"])) + .5 * 60 * 60, config$timezone), hourly[j, "avg"] - hourly[j, "sd"],
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) - 1/2), config$timezone), hourly[j, "avg"] + hourly[j, "sd"],
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) + 1/2), config$timezone), hourly[j, "avg"] - hourly[j, "sd"],
       border = NA,
       col = rgb(0, 1, 0, .15)
     )
