@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import yaml
+import tzlocal
 import subprocess
 from datetime import datetime
 
@@ -16,11 +17,11 @@ p = subprocess.Popen(os.path.join(config["path"], "temp"), stdout=subprocess.PIP
 (output, err) = p.communicate()
 p_status = p.wait()
 
-now = datetime.now()
+now = datetime.now(tzlocal.get_localzone())
 temp = output.strip().decode("utf-8")
 
 with open(os.path.join(config["path"], config["tempsdata"]), "a") as f:
-    f.write("{}\t{}\n".format(now, temp))
+    f.write("{}\t{}\t{}\n".format(now, now.strftime("%Z"), temp))
 
 subprocess.call(["R", "--no-save", "-f", os.path.join(config["path"], "temp-plot.r")])
 
