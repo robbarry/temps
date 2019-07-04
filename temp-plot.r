@@ -22,11 +22,13 @@ hourly <-
 
 sumdata <-
   data %>%
-    filter(today() - rounded < (7 * 24 * 60)) %>%
+    filter(now() - rounded < (7 * 24 * 60)) %>%
     group_by(rounded) %>%
     summarize(test = mean(temp))
 
 png(paste0(config$path, "/", config$tempssummary), width=1000, height=700)
+
+big_range = c(min(with_tz(sumdata$rounded, tzone = config$timezone)), max(with_tz(sumdata$rounded, tzone = config$timezone)))
 
 plot(with_tz(sumdata$rounded, tzone = config$timezone), sumdata$test,
     type = "h", frame = F, lwd = 5, lend = 1,
@@ -61,7 +63,7 @@ m_data <- subset(
 )
 
 png(paste0(config$path, "/", config$tempsimg), width=1000, height=700)
-
+little_range = c(min(with_tz(m_data$tzstamp, config$timezone)), max(with_tz(m_data$tzstamp, config$timezone)))
 plot(with_tz(m_data$tzstamp, config$timezone),
       m_data$temp,
       type = "l",
@@ -103,3 +105,30 @@ for(i in 1:(NROW(sun) - 1)) {
 }
 
 dev.off()
+
+weather <- read.csv(paste0(config$path, "/", config$weatherfile), sep = "\t", header = F, stringsAsFactors = F)
+colnames(weather) <- c("stamp", "temp")
+weather$stamp <- ymd_hms(weather$stamp)
+
+p_weather <- weather %>%
+  filter(now() - stamp < (7 * 24))
+
+png(paste0(config$path, "/weather.png"), width=1000, height=300)
+plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
+     frame = F, pch = 16,
+     xlab = "Hour",
+     ylab = "Temp", col = "black",
+     xlim = big_range)
+dev.off()
+
+p_weather <- weather %>%
+  filter(now() - stamp < (36))
+
+png(paste0(config$path, "/weather-short.png"), width=1000, height=300)
+plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
+     frame = F, pch = 16,
+     xlab = "Hour",
+     ylab = "Temp", col = "black",
+     xlim = little_range)
+dev.off()
+
