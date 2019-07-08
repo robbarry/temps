@@ -112,7 +112,7 @@ colnames(weather) <- c("stamp", "temp")
 weather$stamp <- ymd_hms(weather$stamp)
 
 p_weather <- weather %>%
-  filter(now() - stamp < (7 * 24 * 60))
+  filter(now() - stamp < days(7))
 
 png(paste0(config$path, "/weather.png"), width=1000, height=300)
 plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
@@ -123,7 +123,7 @@ plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
 dev.off()
 
 p_weather <- weather %>%
-  filter(now() - stamp < (36 * 60))
+  filter(now() - stamp < hours(36))
 
 png(paste0(config$path, "/weather-short.png"), width=1000, height=300)
 plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,

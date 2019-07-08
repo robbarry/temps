@@ -7,9 +7,9 @@ import yaml
 import tzlocal
 import requests
 import subprocess
+from pathlib import Path
 from datetime import datetime
 
-from pathlib import Path
 home = str(Path.home())
 
 with open(os.path.join(home, "temps-config.yml"), 'r') as ymlfile:
@@ -18,9 +18,9 @@ with open(os.path.join(home, "temps-config.yml"), 'r') as ymlfile:
 config = cfg["default"]
 upload_weather = False
 
-if config.get("weatherfile", 0) != 0 and datetime.now().minute % 5 == 0:
+if config.get("weatherfile", 0) != 0 and datetime.now().minute % 1 == 0:
     upload_weather = True
-    r = requests.get("https://api.openweathermap.org/data/2.5/weather?lat=40.7442797&lon=-73.9552369&appid=a04295e8bd7a98fcd58567d52b0f4eff")
+    r = requests.get("https://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid=a04295e8bd7a98fcd58567d52b0f4eff".format(config["lat"], config["lon"]))
     data = r.json()
     timezone = pytz.timezone(config["timezone"])
     stamp = datetime.fromtimestamp(data.get("dt", 0)).astimezone(timezone).isoformat()
@@ -32,12 +32,15 @@ if config.get("weatherfile", 0) != 0 and datetime.now().minute % 5 == 0:
     if temp != "":
         temp = (temp - 273.15) * 9 / 5 + 32
         to_write = "{}\t{}\n".format(stamp, round(temp, 1))
-        with open(os.path.join(config["path"], config["weatherfile"]), "rb") as fh:
-            last = fh.readlines()[-1].decode()
-        
-        if to_write != last:
-            with open(os.path.join(config["path"], config["weatherfile"]), "a") as f:
-                f.write(to_write)
+        with open(os.path.join(config["path"], config["weatherfile"]), "r") as f:
+            lines = f.readlines()
+
+        lines.append(to_write)
+        lines = set(lines)
+        lines = list(lines)
+        lines.sort()
+        with open(os.path.join(config["path"], config["weatherfile"]), "w") as f:
+            f.write("".join(lines))
 
 p = subprocess.Popen(os.path.join(config["path"], "temp"), stdout=subprocess.PIPE, shell=True)
 (output, err) = p.communicate()
@@ -57,5 +60,6 @@ time.sleep(10)
 subprocess.call(["scp", os.path.join(config["path"], config["tempsimg"]), "web:/var/www/robbarry.org/html/repo/_site/"])
 subprocess.call(["scp", os.path.join(config["path"], config["tempssummary"]), "web:/var/www/robbarry.org/html/repo/_site/"])
 if upload_weather:
+    # subprocess.call(["scp", os.path.join(config["path"], "weather.txt"), "web:/var/www/robbarry.org/html/repo/_site/"])
     subprocess.call(["scp", os.path.join(config["path"], "weather.png"), "web:/var/www/robbarry.org/html/repo/_site/"])
     subprocess.call(["scp", os.path.join(config["path"], "weather-short.png"), "web:/var/www/robbarry.org/html/repo/_site/"])
