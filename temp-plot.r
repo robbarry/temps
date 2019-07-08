@@ -23,7 +23,7 @@ hourly <-
 
 sumdata <-
   data %>%
-    filter(now() - rounded < (7 * 24 * 60)) %>%
+    filter(now() - rounded < days(7)) %>%
     group_by(rounded) %>%
     summarize(test = mean(temp))
 
@@ -60,7 +60,7 @@ dev.off()
 
 m_data <- subset(
   data,
-  now() - data$tzstamp < (36 * 60 * 60)
+  now() - data$tzstamp < hours(36)
 )
 
 png(paste0(config$path, "/", config$tempsimg), width=1000, height=700)
