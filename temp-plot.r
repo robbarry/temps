@@ -3,7 +3,8 @@ library("config")
 library("suncalc")
 library("lubridate")
 
-config <- config::get(file = "/home/pi/temps-config.yml")
+home <- path.expand("~")
+config <- config::get(file = paste0(home, "/temps-config.yml"))
 
 data <- read.csv(paste0(config$path, "/", config$tempsdata), sep = "\t", header = F)
 colnames(data) <- c("stamp", "timezone", "temp")
@@ -111,7 +112,7 @@ colnames(weather) <- c("stamp", "temp")
 weather$stamp <- ymd_hms(weather$stamp)
 
 p_weather <- weather %>%
-  filter(now() - stamp < (7 * 24))
+  filter(now() - stamp < (7 * 24 * 60))
 
 png(paste0(config$path, "/weather.png"), width=1000, height=300)
 plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
@@ -122,7 +123,7 @@ plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
 dev.off()
 
 p_weather <- weather %>%
-  filter(now() - stamp < (36))
+  filter(now() - stamp < (36 * 60))
 
 png(paste0(config$path, "/weather-short.png"), width=1000, height=300)
 plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,

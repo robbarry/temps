@@ -8,3 +8,5 @@ cd TEMPered/
 sudo cmake .
 sudo make
 ```
+
+https://github.com/padelt/temper-python/issues/84
