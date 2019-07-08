@@ -120,6 +120,22 @@ plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
      xlab = "Hour",
      ylab = "Temp", col = "black",
      xlim = big_range)
+
+for(i in 1:(NROW(sun) - 1)) {
+  for(j in 1:NROW(hourly)) {
+    rect(
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) - 1/2), config$timezone), hourly[j, "avg"] + hourly[j, "sd"],
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) + 1/2), config$timezone), hourly[j, "avg"] - hourly[j, "sd"],
+      border = NA,
+      col = rgb(0, 1, 0, .15)
+    )
+  }
+  start <- sun[i, "sunset"]
+  end <- sun[i + 1, "sunrise"]
+  rect(start, -10, end, 150, col = rgb(0, 0, 0, .15), border = NA)
+}
+
+
 dev.off()
 
 p_weather <- weather %>%
@@ -131,5 +147,20 @@ plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
      xlab = "Hour",
      ylab = "Temp", col = "black",
      xlim = little_range)
+
+for(i in 1:(NROW(sun) - 1)) {
+  for(j in 1:NROW(hourly)) {
+    rect(
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) - 1/2), config$timezone), hourly[j, "avg"] + hourly[j, "sd"],
+      with_tz(ymd(sun[i, "date"]) + dhours(as.numeric(hourly[j, "hour"]) + 1/2), config$timezone), hourly[j, "avg"] - hourly[j, "sd"],
+      border = NA,
+      col = rgb(0, 1, 0, .15)
+    )
+  }
+  start <- sun[i, "sunset"]
+  end <- sun[i + 1, "sunrise"]
+  rect(start, -10, end, 150, col = rgb(0, 0, 0, .15), border = NA)
+}
+
 dev.off()
 

@@ -42,16 +42,6 @@ if config.get("weatherfile", 0) != 0 and datetime.now().minute % 1 == 0:
         with open(os.path.join(config["path"], config["weatherfile"]), "w") as f:
             f.write("".join(lines))
 
-p = subprocess.Popen(os.path.join(config["path"], "temp"), stdout=subprocess.PIPE, shell=True)
-(output, err) = p.communicate()
-p_status = p.wait()
-
-now = datetime.now(tzlocal.get_localzone())
-temp = output.strip().decode("utf-8")
-
-with open(os.path.join(config["path"], config["tempsdata"]), "a") as f:
-    f.write("{}\t{}\t{}\n".format(now, now.strftime("%Z"), temp))
-
 subprocess.call(["R", "--no-save", "-f", os.path.join(config["path"], "temp-plot.r")])
 
 time.sleep(10)
