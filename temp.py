@@ -49,6 +49,7 @@ time.sleep(10)
 # subprocess.call(["scp", "/home/pi/temps/temp.txt", "web:/var/www/robbarry.org/html/repo/_site/"])
 subprocess.call(["scp", os.path.join(config["path"], config["tempsimg"]), "web:/var/www/robbarry.org/html/repo/_site/"])
 subprocess.call(["scp", os.path.join(config["path"], config["tempssummary"]), "web:/var/www/robbarry.org/html/repo/_site/"])
+subprocess.call(["scp", os.path.join(config["path"], config["nightname"]), "web:/var/www/robbarry.org/html/repo/_site/"])
 if upload_weather:
     # subprocess.call(["scp", os.path.join(config["path"], "weather.txt"), "web:/var/www/robbarry.org/html/repo/_site/"])
     subprocess.call(["scp", os.path.join(config["path"], "weather.png"), "web:/var/www/robbarry.org/html/repo/_site/"])

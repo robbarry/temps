@@ -107,6 +107,25 @@ for(i in 1:(NROW(sun) - 1)) {
 
 dev.off()
 
+ndata <-
+  subset(data, now() - tzstamp < days(30))
+
+ndata$hour <- hour(with_tz(ndata$tzstamp, tz = "America/New_York"))
+ndata <- subset(ndata, hour %in% c(1, 2, 3, 4))
+
+night_analysis <-
+  ndata %>%
+    group_by(day) %>%
+    summarize(avg_temp = mean(temp))
+
+png(paste0(config$path, "/", config$nightname), width = 1000, height = 700)
+plot(night_analysis, frame = F,
+     type = "h", lwd = 5, lend = 1,
+     col = "darkblue",
+     main = paste0(config$tempstitle, " [nights]"),
+     xlab = "Date", ylab = "Temp")
+dev.off()
+
 weather <- read.csv(paste0(config$path, "/", config$weatherfile), sep = "\t", header = F, stringsAsFactors = F)
 colnames(weather) <- c("stamp", "temp")
 weather$stamp <- ymd_hms(weather$stamp)
@@ -114,7 +133,7 @@ weather$stamp <- ymd_hms(weather$stamp)
 p_weather <- weather %>%
   filter(now() - stamp < days(7))
 
-png(paste0(config$path, "/weather.png"), width=1000, height=300)
+png(paste0(config$path, "/weather.png"), width=1000, height=700)
 plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
      frame = F, pch = 16,
      xlab = "Hour",
@@ -133,7 +152,7 @@ dev.off()
 p_weather <- weather %>%
   filter(now() - stamp < hours(36))
 
-png(paste0(config$path, "/weather-short.png"), width=1000, height=300)
+png(paste0(config$path, "/weather-short.png"), width=1000, height=700)
 plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
      frame = F, pch = 16,
      xlab = "Hour",
