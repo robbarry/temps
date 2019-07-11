@@ -1,3 +1,4 @@
+library("zoo")
 library("dplyr")
 library("config")
 library("suncalc")
@@ -126,15 +127,15 @@ plot(night_analysis, frame = F,
      xlab = "Date", ylab = "Temp")
 dev.off()
 
-weather <- read.csv(paste0(config$path, "/", config$weatherfile), sep = "\t", header = F, stringsAsFactors = F)
-colnames(weather) <- c("stamp", "temp")
+weather <- read.csv("https://robbarry.org/weather.txt", header = F, stringsAsFactors = F, sep = "\t")
+colnames(weather) <- c("stamp", "temp_out")
 weather$stamp <- ymd_hms(weather$stamp)
 
 p_weather <- weather %>%
   filter(now() - stamp < days(7))
 
 png(paste0(config$path, "/weather.png"), width=1000, height=700)
-plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
+plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp_out,
      frame = F, pch = 16,
      xlab = "Hour",
      ylab = "Temp", col = "black",
@@ -149,11 +150,11 @@ for(i in 1:(NROW(sun) - 1)) {
 
 dev.off()
 
-p_weather <- weather %>%
+ps_weather <- weather %>%
   filter(now() - stamp < hours(36))
 
 png(paste0(config$path, "/weather-short.png"), width=1000, height=700)
-plot(with_tz(p_weather$stamp, tzone = "America/New_York"), p_weather$temp,
+plot(with_tz(ps_weather$stamp, tzone = "America/New_York"), ps_weather$temp_out,
      frame = F, pch = 16,
      xlab = "Hour",
      ylab = "Temp", col = "black",
@@ -167,3 +168,34 @@ for(i in 1:(NROW(sun) - 1)) {
 
 dev.off()
 
+temps <- read.csv(paste0(config$path, "/", config$tempsdata), sep = "\t", header = F)
+colnames(temps) <- c("stamp", "tz", "temp_in") 
+temps$tzstamp <- ymd_hms(temps$stamp)
+
+data <- data.frame(
+  stamp = unique(c(temps$tzstamp, p_weather$stamp))
+)
+
+pdata <- base::merge(data, temps[, c(3, 4)], by.x = "stamp", by.y = "tzstamp", all.x = T)
+pdata <- base::merge(pdata, p_weather, by.x = "stamp", by.y = "stamp", all.x = T)
+pdata$temp_in_approx <- na.approx(pdata$temp_in, na.rm = F)
+pdata$temp_out_approx <- na.approx(pdata$temp_out, na.rm = F)
+pdata <- subset(pdata, !is.na(temp_out_approx) & !is.na(temp_in_approx))
+pdata$temp_diff <- pdata$temp_out_approx - pdata$temp_in_approx
+
+pldata <- subset(pdata, now() - pdata$stamp < days(7))
+pldata$stamp <- with_tz(pldata$stamp, tz = "America/New_York")
+
+png(paste0(config$path, "/", config$diffname), width = 1000, height = 700)
+plot(pldata$stamp, pldata$temp_diff, frame = F,
+     xlab = "Date", ylab = "Temp differential", pch = 16, cex = 1,
+     main = paste0(config$tempstitle, " [weather differential]"),
+     xlim = big_range)
+
+for(i in 1:(NROW(sun) - 1)) {
+  start <- sun[i, "sunset"]
+  end <- sun[i + 1, "sunrise"]
+  rect(start, -10, end, 150, col = rgb(0, 0, 0, .15), border = NA)
+}
+
+dev.off()
