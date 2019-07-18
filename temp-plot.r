@@ -172,9 +172,10 @@ temps <- read.csv(paste0(config$path, "/", config$tempsdata), sep = "\t", header
 colnames(temps) <- c("stamp", "tz", "temp_in") 
 temps$tzstamp <- ymd_hms(temps$stamp)
 
-data <- data.frame(
-  stamp = unique(c(temps$tzstamp, p_weather$stamp))
-)
+p_weather <- weather %>%
+  filter(now() - stamp < days(21))
+
+data <- data.frame(stamp = unique(c(temps$tzstamp, p_weather$stamp)))
 
 pdata <- base::merge(data, temps[, c(3, 4)], by.x = "stamp", by.y = "tzstamp", all.x = T)
 pdata <- base::merge(pdata, p_weather, by.x = "stamp", by.y = "stamp", all.x = T)
@@ -199,3 +200,17 @@ for(i in 1:(NROW(sun) - 1)) {
 }
 
 dev.off()
+
+pldata <- subset(pdata, now() - pdata$stamp < days(32))
+pldata$stamp <- with_tz(pldata$stamp, tz = "America/New_York")
+pldata$rmean <- rollmean(pldata$temp_diff, k = 48 * 60, align = "right", fill = NA)
+pldata <- pldata[!is.na(pldata$rmean), ]
+
+png(paste0(config$path, "/", config$difflong), width = 1000, height = 700)
+plot(pldata$stamp, pldata$rmean, frame = F,
+     xlab = "Date", ylab = "Mean temp differential", pch = 16, cex = 1,
+     main = paste0(config$tempstitle, " [long differential]"), type = "l", col = "red", lwd = 3)
+
+dev.off()
+
+

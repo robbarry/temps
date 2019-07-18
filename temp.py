@@ -51,6 +51,7 @@ subprocess.call(["scp", os.path.join(config["path"], config["tempsimg"]), "web:/
 subprocess.call(["scp", os.path.join(config["path"], config["tempssummary"]), "web:/var/www/robbarry.org/html/repo/_site/"])
 subprocess.call(["scp", os.path.join(config["path"], config["nightname"]), "web:/var/www/robbarry.org/html/repo/_site/"])
 subprocess.call(["scp", os.path.join(config["path"], config["diffname"]), "web:/var/www/robbarry.org/html/repo/_site/"])
+subprocess.call(["scp", os.path.join(config["path"], config["difflong"]), "web:/var/www/robbarry.org/html/repo/_site/"])
 if upload_weather:
     subprocess.call(["scp", os.path.join(config["path"], "weather.txt"), "web:/var/www/robbarry.org/html/repo/_site/"])
     subprocess.call(["scp", os.path.join(config["path"], "weather.png"), "web:/var/www/robbarry.org/html/repo/_site/"])
